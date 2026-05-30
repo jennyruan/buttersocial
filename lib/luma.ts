@@ -38,67 +38,110 @@ export class LumaFetchError extends Error {
 // --- Public entrypoints --------------------------------------------------
 
 /**
- * Smart entrypoint: accepts a bare username, profile URL, or event URL and
- * dispatches to the right fetcher.
+ * Smart entrypoint: accepts one or many event URLs separated by whitespace,
+ * commas, or newlines. Returns the union of fetched events, deduped by id.
  *
- *   "jennyruan"                           → fetchLumaUserEvents
- *   "https://lu.ma/jennyruan"             → fetchLumaUserEvents
- *   "lu.ma/jennyruan"                     → fetchLumaUserEvents
- *   "https://lu.ma/abc123"                → fetchLumaEventByUrl (single event)
- *   "https://lu.ma/event/evt-xyz/abc123"  → fetchLumaEventByUrl
+ *   "https://lu.ma/h7h9r7bw"
+ *   "https://lu.ma/abc123, https://lu.ma/def456"
+ *   multi-line paste of URLs
+ *
+ * NOTE: bare username / profile URL is NOT supported. Luma's user-events
+ * API is private (loaded client-side via authed JS). We surface a clear
+ * error instructing the user to paste individual event URLs instead.
  */
 export async function fetchLumaFromInput(input: string): Promise<LumaEvent[]> {
-  const cleaned = input.trim().replace(/^https?:\/\//, "").replace(/^lu\.ma\//, "");
-  if (!cleaned) throw new LumaFetchError("Empty input", input);
+  const trimmed = input.trim();
+  if (!trimmed) throw new LumaFetchError("Empty input", input);
 
-  // Event URLs typically contain `/event/` segment or a short slug AFTER user;
-  // Luma's permalink scheme isn't perfectly deterministic, so we try user-first
-  // and fall back to event-fetch on empty results.
-  const segments = cleaned.split("/").filter(Boolean);
-
-  // Heuristic: if first segment is `event` or `e` it's an event link
-  if (segments[0] === "event" || segments[0] === "e") {
-    const url = `${LUMA_BASE}/${segments.join("/")}`;
-    const ev = await fetchLumaEventByUrl(url);
-    return [ev];
+  const urls = parseEventUrls(trimmed);
+  if (urls.length === 0) {
+    throw new LumaFetchError(
+      "No Luma event URLs found. Paste one or more event URLs like https://lu.ma/abc123 — Luma profiles can't be auto-imported (their API is private).",
+      input,
+    );
   }
 
-  // Otherwise try treating it as a username
-  const username = segments[0];
-  try {
-    const events = await fetchLumaUserEvents(username);
-    if (events.length > 0) return events;
-  } catch (err) {
-    // fall through to single-event attempt
-  }
-
-  // Fallback: treat as a short event slug
-  const url = `${LUMA_BASE}/${segments.join("/")}`;
-  const ev = await fetchLumaEventByUrl(url);
-  return [ev];
+  return fetchLumaEventsFromUrls(urls);
 }
 
 /**
- * Fetch all public upcoming + past events for a Luma user by username.
+ * Parse a free-text blob and return any lu.ma / luma.com event URLs in it.
+ * Skips profile URLs (`/u/...` or bare username paths) since they need the
+ * authed user-events API that isn't public.
  */
-export async function fetchLumaUserEvents(username: string): Promise<LumaEvent[]> {
-  const profileUrl = `${LUMA_BASE}/${encodeURIComponent(username)}`;
-  const html = await fetchHtml(profileUrl);
+export function parseEventUrls(input: string): string[] {
+  const tokens = input
+    .split(/[\s,]+/)
+    .map(t => t.trim())
+    .filter(Boolean);
 
-  const nextData = extractNextData(html);
-  if (nextData) {
-    const events = extractEventsFromNextData(nextData);
-    if (events.length > 0) return events;
+  const urls: string[] = [];
+  for (const tok of tokens) {
+    const url = normalizeEventUrl(tok);
+    if (url) urls.push(url);
   }
+  return Array.from(new Set(urls));
+}
 
-  // If __NEXT_DATA__ didn't yield anything, fall back to JSON-LD list
-  const jsonLdEvents = extractJsonLdEvents(html, profileUrl);
-  if (jsonLdEvents.length > 0) return jsonLdEvents;
+function normalizeEventUrl(token: string): string | null {
+  // Accept bare slugs (≥6 alnum chars, no slash) as short event codes too
+  let candidate = token;
+  if (!/^https?:\/\//i.test(candidate) && !/^lu\.ma|^luma\.com/i.test(candidate)) {
+    // Bare slug like "h7h9r7bw" → treat as short event code
+    if (/^[a-zA-Z0-9_-]{4,}$/.test(candidate)) {
+      return `${LUMA_BASE}/${candidate}`;
+    }
+    return null;
+  }
+  if (!/^https?:\/\//i.test(candidate)) {
+    candidate = `https://${candidate}`;
+  }
+  let u: URL;
+  try {
+    u = new URL(candidate);
+  } catch {
+    return null;
+  }
+  // Normalize luma.com → lu.ma
+  if (u.hostname === "luma.com" || u.hostname === "www.luma.com") {
+    u.hostname = "lu.ma";
+  }
+  if (u.hostname !== "lu.ma" && u.hostname !== "www.lu.ma") return null;
+  // Strip query (?tk=, etc.) and trailing slash
+  u.search = "";
+  u.hash = "";
+  const pathSegments = u.pathname.split("/").filter(Boolean);
+  if (pathSegments.length === 0) return null;
+  // Skip profile URLs explicitly
+  if (pathSegments[0] === "u" || pathSegments[0] === "user") return null;
+  return u.toString().replace(/\/$/, "");
+}
 
-  throw new LumaFetchError(
-    `Could not extract any events from ${profileUrl}. Profile may be empty or Luma's page shape changed.`,
-    profileUrl,
-  );
+/**
+ * Fetch a batch of event URLs in parallel. Failures are surfaced as
+ * fetch errors with the offending URL but don't abort the batch — the
+ * caller gets back as many successful events as we could pull.
+ */
+export async function fetchLumaEventsFromUrls(urls: string[]): Promise<LumaEvent[]> {
+  const settled = await Promise.allSettled(urls.map(u => fetchLumaEventByUrl(u)));
+  const events: LumaEvent[] = [];
+  const errors: LumaFetchError[] = [];
+  for (const r of settled) {
+    if (r.status === "fulfilled") {
+      events.push(r.value);
+    } else {
+      errors.push(
+        r.reason instanceof LumaFetchError
+          ? r.reason
+          : new LumaFetchError(String(r.reason), "(unknown)"),
+      );
+    }
+  }
+  if (events.length === 0 && errors.length > 0) {
+    // Every URL failed — bubble up the first error so the UI can surface it
+    throw errors[0];
+  }
+  return dedupeById(events);
 }
 
 /**
@@ -273,11 +316,32 @@ function extractJsonLdEvents(html: string, sourceUrl: string): LumaEvent[] {
 }
 
 function jsonLdToEvent(item: Record<string, unknown>, sourceUrl: string): LumaEvent {
-  const organizer = item.organizer as { name?: string; url?: string } | string | undefined;
-  const organizerName =
-    typeof organizer === "string"
-      ? organizer
-      : organizer?.name ?? "Unknown host";
+  // organizer can be: string | object | array (Luma puts orgs + people in one array)
+  type Org = { name?: string; url?: string; "@type"?: string };
+  const orgRaw = item.organizer as string | Org | Array<string | Org> | undefined;
+  let organizerName = "Unknown host";
+  let organizerUrl: string | undefined;
+  if (Array.isArray(orgRaw)) {
+    // Pick the first Organization if present, else first Person, else first item.
+    const orgs = orgRaw.filter(
+      (o): o is Org => typeof o === "object" && o !== null,
+    );
+    const firstOrg =
+      orgs.find(o => o["@type"] === "Organization") ??
+      orgs.find(o => o["@type"] === "Person") ??
+      orgs[0];
+    if (firstOrg) {
+      organizerName = firstOrg.name ?? organizerName;
+      organizerUrl = firstOrg.url;
+    } else if (typeof orgRaw[0] === "string") {
+      organizerName = orgRaw[0];
+    }
+  } else if (typeof orgRaw === "string") {
+    organizerName = orgRaw;
+  } else if (orgRaw && typeof orgRaw === "object") {
+    organizerName = orgRaw.name ?? organizerName;
+    organizerUrl = orgRaw.url;
+  }
 
   let locationStr: string | undefined;
   const loc = item.location;
@@ -297,7 +361,7 @@ function jsonLdToEvent(item: Record<string, unknown>, sourceUrl: string): LumaEv
     id: deriveIdFromUrl(url),
     title: String(item.name ?? "Untitled"),
     host: organizerName,
-    hostUrl: typeof organizer === "object" ? organizer?.url : undefined,
+    hostUrl: organizerUrl,
     datetime: String(item.startDate ?? ""),
     endDatetime: item.endDate as string | undefined,
     url,

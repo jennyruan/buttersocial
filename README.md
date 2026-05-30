@@ -67,13 +67,18 @@ The solo founder / busy professional at a coworking space who:
 ## Scope (locked 2026-05-30 ~1:25pm)
 
 ### ✅ In v1
-- Connect Luma by username or URL → real fetch from lu.ma (no mocks)
+- Paste one or many Luma **event URLs** → real fetch from lu.ma (no mocks)
 - Evermind: write past feedback, retrieve as ranking context (real instance)
 - Butterbase: persist events + attendance + intros (real project)
 - LLM ranking with cited reasoning
 - LLM-drafted host intro (DRAFT ONLY — not sent)
-- Single-screen UI (paste box + output card)
-- Demo dataset = Jenny's actual past Luma events
+- Single-screen UI (textarea + output cards)
+- Demo dataset = real Luma event URLs Jenny has actually attended or is considering
+
+**Why URLs not username?** Luma's user-events API is private (loaded
+client-side via authed JS). Probed during build — `api.lu.ma/ics/get`
+exists but rejects unauthed requests, `/_next/data/...` is Cloudflare-blocked.
+Pasting URLs keeps the data 100% real and bypasses the auth wall.
 
 ### ❌ Cut for v1 (do not rebuild)
 - LinkedIn / Instagram / X API integration → roadmap slide (no mocks in demo)

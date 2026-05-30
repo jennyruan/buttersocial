@@ -58,32 +58,34 @@ export default function ConnectPage() {
 
       <main className="bs-main">
         <section className="bs-card bs-connect-card">
-          <h2 className="bs-section-title">Connect your Luma</h2>
+          <h2 className="bs-section-title">Connect your Luma events</h2>
           <p className="bs-help-text">
-            Enter your Luma username (e.g.{" "}
-            <code className="bs-mono">jennyruan</code>) or paste a profile /
-            event URL. ButterSocial fetches your real events live from{" "}
-            <code className="bs-mono">lu.ma</code> — no mock data.
+            Paste one or more Luma event URLs — one per line, comma-separated,
+            or any mix. ButterSocial fetches each event live from{" "}
+            <code className="bs-mono">lu.ma</code>: no mock data, no auth
+            required. (Luma doesn't expose a public user-events API, so we
+            work from links rather than usernames.)
           </p>
 
-          <form onSubmit={handleImport} className="bs-form">
-            <input
-              type="text"
+          <form onSubmit={handleImport} className="bs-form bs-form-vertical">
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="jennyruan  or  https://lu.ma/jennyruan"
-              className="bs-input"
+              placeholder={
+                "https://lu.ma/h7h9r7bw\nhttps://lu.ma/abc123\n…"
+              }
+              className="bs-input bs-textarea"
               disabled={loading}
               autoFocus
-              autoComplete="off"
               spellCheck={false}
+              rows={5}
             />
             <button
               type="submit"
               className="bs-btn-primary"
               disabled={loading || !input.trim()}
             >
-              {loading ? "Importing…" : "Import"}
+              {loading ? "Importing…" : "Import events"}
             </button>
           </form>
 
