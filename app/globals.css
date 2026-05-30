@@ -246,6 +246,45 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   font-size: 14px;
 }
 
+.sb-source-list {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.sb-source-list li { padding-left: 2px; }
+.sb-link-inline {
+  margin-top: 0;
+  display: inline;
+  align-self: auto;
+}
+
+.sb-event-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sb-source-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.sb-source-luma   { background: rgba(212, 166, 87, 0.20); }
+.sb-source-apple  { background: rgba(43, 43, 43, 0.08); }
+.sb-source-google { background: rgba(212, 106, 106, 0.18); }
+.sb-source-ics    { background: rgba(43, 43, 43, 0.04); }
+
 @media (max-width: 640px) {
   .sb-header { padding: 12px 16px; }
   .sb-main { padding: 18px 16px 80px; }

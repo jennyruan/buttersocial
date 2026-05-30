@@ -14,6 +14,11 @@
 // error rather than returning fake data.
 
 import type { LumaEvent } from "./luma";
+import {
+  eventsToBusySlots,
+  findConflict,
+  type CalendarEvent,
+} from "./calendar";
 
 // --- Public types ---------------------------------------------------------
 
@@ -63,6 +68,12 @@ export interface RankOptions {
   goal?: string;
   /** How many memories to retrieve per event for context. Default 5. */
   memoriesPerEvent?: number;
+  /**
+   * The user's existing calendar (from Apple / Google / Luma subscriptions).
+   * Used for hard time-conflict detection — surfaces in the verdict's reason
+   * so the demo shows "Skip — conflicts with <calendar event> on <source>".
+   */
+  busyEvents?: CalendarEvent[];
 }
 
 // --- Ranking --------------------------------------------------------------
@@ -76,21 +87,30 @@ export async function rankEvents(
 
   const topK = options.memoriesPerEvent ?? 5;
 
+  // Pre-compute calendar conflicts so the LLM can cite them as hard constraints.
+  const busyEvents = options.busyEvents ?? [];
+  const busySlots = eventsToBusySlots(busyEvents);
+  const conflicts = events.map(ev => findConflict(
+    { datetime: ev.datetime, endDatetime: ev.endDatetime },
+    busySlots,
+    busyEvents,
+  ));
+
   // Pull relevant memory context for each event in parallel.
   const memoryBundles = await Promise.all(
-    events.map(async ev => {
+    events.map(async (ev, i) => {
       const query = `${ev.title} hosted by ${ev.host}${ev.location ? ` in ${ev.location}` : ""}`;
       const memories = await deps.evermind.searchMemories(query, { topK });
-      return { event: ev, memories };
+      return { event: ev, memories, conflict: conflicts[i] };
     }),
   );
 
   // One LLM call ranks the full batch — keeps reasoning consistent across events
   // and gives the model the ability to compare them.
-  const systemPrompt = `You are SocialButter, an agent that decides which networking events a busy founder should attend. Be opinionated. Lean on the user's past feedback. For each event, output a JSON object with:
+  const systemPrompt = `You are SocialButter, an agent that decides which networking events a busy founder should attend. Be opinionated. Lean on the user's past feedback. HARD RULE: if an event has a CALENDAR CONFLICT, decision MUST be "skip" and the reason MUST cite the conflicting calendar event by name and source. For each event, output a JSON object with:
   - "id": echo of the event id
   - "decision": "go" | "skip" | "maybe"
-  - "reason": ONE plain-language sentence, under 30 words, that cites the user's past feedback when applicable
+  - "reason": ONE plain-language sentence, under 30 words, citing past feedback or the calendar conflict
   - "citationMemoryIds": array of memory ids that justified the decision (empty array if none applied)
 
 Return JSON: {"verdicts": [{...}, {...}, ...]} — in the same order as the input.`;
@@ -113,7 +133,7 @@ Return JSON: {"verdicts": [{...}, {...}, ...]} — in the same order as the inpu
 }
 
 function buildRankingUserPrompt(
-  bundles: Array<{ event: LumaEvent; memories: EvermindMemory[] }>,
+  bundles: Array<{ event: LumaEvent; memories: EvermindMemory[]; conflict: CalendarEvent | null }>,
   goal: string | undefined,
 ): string {
   const goalLine = goal
@@ -121,7 +141,7 @@ function buildRankingUserPrompt(
     : "";
 
   const eventBlocks = bundles
-    .map(({ event, memories }) => {
+    .map(({ event, memories, conflict }) => {
       const memoryLines =
         memories.length === 0
           ? "  (no past feedback found that's relevant to this event)"
@@ -133,12 +153,16 @@ function buildRankingUserPrompt(
               )
               .join("\n");
 
+      const conflictLine = conflict
+        ? `\nCALENDAR CONFLICT: overlaps "${conflict.title}" at ${conflict.datetime} on ${conflict.sourceLabel}. You MUST decide "skip" and cite this in the reason.`
+        : "";
+
       return `EVENT id=${event.id}
 title: ${event.title}
 host:  ${event.host}
 when:  ${event.datetime}${event.endDatetime ? ` → ${event.endDatetime}` : ""}
 where: ${event.location ?? "(unspecified)"}
-desc:  ${truncate(event.description ?? "", 300)}
+desc:  ${truncate(event.description ?? "", 300)}${conflictLine}
 
 relevant past feedback:
 ${memoryLines}`;

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { LumaEvent } from "@/lib/luma";
+import type { CalendarEvent } from "@/lib/calendar";
 
 export default function ConnectPage() {
   const [input, setInput] = useState("");
-  const [events, setEvents] = useState<LumaEvent[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importErrors, setImportErrors] = useState<Array<{ url: string; message: string }>>([]);
   const [importedFrom, setImportedFrom] = useState<string | null>(null);
 
   async function handleImport(e: React.FormEvent) {
@@ -17,8 +18,9 @@ export default function ConnectPage() {
 
     setLoading(true);
     setError(null);
+    setImportErrors([]);
     try {
-      const res = await fetch("/api/luma/import", {
+      const res = await fetch("/api/calendar/import", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ input: trimmed }),
@@ -28,6 +30,7 @@ export default function ConnectPage() {
         throw new Error(data.error ?? `Import failed (HTTP ${res.status})`);
       }
       setEvents(data.events ?? []);
+      setImportErrors(data.errors ?? []);
       setImportedFrom(trimmed);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -36,6 +39,8 @@ export default function ConnectPage() {
       setLoading(false);
     }
   }
+
+  const sourceCounts = countBySource(events);
 
   return (
     <div className="sb-page">
@@ -50,50 +55,92 @@ export default function ConnectPage() {
 
       <main className="sb-main">
         <section className="sb-card sb-connect-card">
-          <h2 className="sb-section-title">Connect your Luma</h2>
+          <h2 className="sb-section-title">Connect your calendars</h2>
           <p className="sb-help-text">
-            Paste your <strong>personal Luma calendar URL</strong> to pull
-            every event you&apos;ve RSVP&apos;d to or hosted — SocialButter
-            refreshes on every load. Find it at{" "}
-            <a
-              href="https://lu.ma/settings/calendar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="sb-link"
-            >
-              Luma → Settings → Calendar
-            </a>{" "}
-            (look for the <code className="sb-mono">api.lu.ma/ics/...</code>
-            link). Or paste individual{" "}
-            <code className="sb-mono">lu.ma/&lt;event&gt;</code> URLs — one
-            per line. All data fetched live, no mocks.
+            Paste any combination of subscription URLs below — Apple, Google,
+            Luma, or individual Luma event URLs. SocialButter pulls live on
+            every load. No mocks.
           </p>
+
+          <ul className="sb-source-list">
+            <li>
+              <strong>Apple Calendar</strong> —{" "}
+              <span className="sb-help-text">
+                System Settings → Apple Account → iCloud → Calendar → Share
+                Calendar → Public Calendar → copy{" "}
+                <code className="sb-mono">webcal://</code> URL.
+              </span>
+            </li>
+            <li>
+              <strong>Google Calendar</strong> —{" "}
+              <span className="sb-help-text">
+                <a
+                  href="https://calendar.google.com/calendar/u/0/r/settings"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sb-link sb-link-inline"
+                >
+                  Settings
+                </a>{" "}
+                → pick a calendar → Integrate calendar → copy{" "}
+                <em>Secret address in iCal format</em>.
+              </span>
+            </li>
+            <li>
+              <strong>Luma</strong> —{" "}
+              <span className="sb-help-text">
+                <a
+                  href="https://lu.ma/settings/calendar"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sb-link sb-link-inline"
+                >
+                  Settings → Calendar
+                </a>
+                , or paste a single{" "}
+                <code className="sb-mono">lu.ma/&lt;event&gt;</code> URL.
+              </span>
+            </li>
+          </ul>
 
           <form onSubmit={handleImport} className="sb-form sb-form-vertical">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
-                "https://api.lu.ma/ics/get?entity=user&id=…&token=…\n\n— or —\n\nhttps://lu.ma/h7h9r7bw\nhttps://lu.ma/abc123"
+                "webcal://p52-caldav.icloud.com/published/2/...\nhttps://calendar.google.com/calendar/ical/.../basic.ics\nhttps://api.lu.ma/ics/get?entity=user&id=...\nhttps://lu.ma/abc123"
               }
               className="sb-input sb-textarea"
               disabled={loading}
               autoFocus
               spellCheck={false}
-              rows={5}
+              rows={6}
             />
             <button
               type="submit"
               className="sb-btn-primary"
               disabled={loading || !input.trim()}
             >
-              {loading ? "Connecting…" : "Connect Luma"}
+              {loading ? "Connecting…" : "Connect calendars"}
             </button>
           </form>
 
           {error && (
             <div className="sb-error" role="alert">
               <strong>Couldn&apos;t import:</strong> {error}
+            </div>
+          )}
+          {importErrors.length > 0 && (
+            <div className="sb-error" role="alert">
+              <strong>Some URLs failed:</strong>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                {importErrors.map((e, i) => (
+                  <li key={i}>
+                    <code className="sb-mono">{e.url.slice(0, 60)}{e.url.length > 60 ? "…" : ""}</code>
+                    {" — "}{e.message}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </section>
@@ -104,12 +151,9 @@ export default function ConnectPage() {
               <h2 className="sb-section-title">
                 {events.length} event{events.length === 1 ? "" : "s"}
               </h2>
-              {importedFrom && (
-                <span className="sb-mono sb-events-source">
-                  from {importedFrom.slice(0, 60)}
-                  {importedFrom.length > 60 ? "…" : ""}
-                </span>
-              )}
+              <span className="sb-mono sb-events-source">
+                {sourceCounts.map(s => `${s.count} ${s.label}`).join(" · ")}
+              </span>
             </div>
             <div className="sb-event-grid">
               {events
@@ -123,35 +167,46 @@ export default function ConnectPage() {
         )}
 
         {!loading && !error && events.length === 0 && importedFrom && (
-          <div className="sb-empty">
-            No events found for that input.
-          </div>
+          <div className="sb-empty">No events found for that input.</div>
         )}
       </main>
     </div>
   );
 }
 
-function EventCard({ event }: { event: LumaEvent }) {
+function EventCard({ event }: { event: CalendarEvent }) {
   const when = formatWhen(event.datetime);
   return (
     <article className="sb-card sb-event-card">
-      <div className="sb-event-when sb-mono">{when}</div>
+      <div className="sb-event-meta-row">
+        <div className="sb-event-when sb-mono">{when}</div>
+        <span className={`sb-source-chip sb-source-${event.source}`}>
+          {event.sourceLabel}
+        </span>
+      </div>
       <h3 className="sb-event-title">{event.title}</h3>
       <div className="sb-event-host">by {event.host}</div>
       {event.location && (
         <div className="sb-event-location">{event.location}</div>
       )}
-      <a
-        href={event.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="sb-link"
-      >
-        Open on Luma →
-      </a>
+      {event.url && (
+        <a
+          href={event.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sb-link"
+        >
+          Open →
+        </a>
+      )}
     </article>
   );
+}
+
+function countBySource(events: CalendarEvent[]): Array<{ label: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const e of events) counts.set(e.sourceLabel, (counts.get(e.sourceLabel) ?? 0) + 1);
+  return Array.from(counts.entries()).map(([label, count]) => ({ label, count }));
 }
 
 function formatWhen(iso: string): string {
