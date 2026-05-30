@@ -15,7 +15,7 @@ terminals are doing.
 
 ## Log
 
-- 13:34 [A] Init: README + first commit `e1bb56d`, GitHub repo created (`jennyruan/buttersocial`, public).
+- 13:34 [A] Init: README + first commit `e1bb56d`, GitHub repo created (`jennyruan/socialbutter`, public).
 - 13:43 [A] CLAUDE.md (project rules) + Luma fetcher + drafts/ (UI, CSS, route) pushed `a963508`.
 - 13:43 [B] Added `.mcp.json` (Butterbase MCP) + `scripts/evermind-smoke.mjs` (API validation).
 - 13:52 [A] Pivoted Luma fetcher to URL-paste flow (profile API is private); organizer-array fix `736b617`.
@@ -24,4 +24,5 @@ terminals are doing.
 - 15:18 [A] Luma "connect" via personal iCal subscription URL — `fetchLumaEventsFromIcsUrl` + ICS parser in `lib/luma.ts`; `fetchLumaFromInput` routes ICS-vs-URL-paste; connect UI copy leads with calendar URL.
 - 15:25 [A-opus] Verified Evermind LIVE — `scripts/evermind-smoke.mjs` write=202 search=200. Wrote `lib/evermind.ts` (HttpEvermindClient) implementing `EvermindClient`. ⚠️ Writes are async — pre-seed memories minutes before demo, don't seed live.
 - 15:37 [A-opus] Scaffolded Next.js 15 + React 19 by hand. App is LIVE on http://localhost:3000/connect — `/api/luma/import` returns real today's-hackathon-event JSON (verified). Added .gitignore for `.next/`, `node_modules/`, `.env*`, `/.claude/settings.json`, `/seed/feedback.json`.
-- 15:50 [A] Backstage browser agent shipped. `lib/browser-agent.ts` (Playwright, persistent Chrome profile @ `~/.buttersocial-browser-profile`, humanized delays/typing/scroll, webdriver-flag override, rate-limits LinkedIn=8/hr 25/day). Actions: `rsvpLumaEvent`, `linkedinConnect`, `runBackstageQueue`. One-time login via `node scripts/browser-agent-setup.mjs`. CLI testing via `pnpm exec tsx scripts/browser-agent-run.ts ...`. Added `playwright` + `tsx` to deps.
+- 15:50 [A] Backstage browser agent shipped. `lib/browser-agent.ts` (Playwright, persistent Chrome profile @ `~/.socialbutter-browser-profile`, humanized delays/typing/scroll, webdriver-flag override, rate-limits LinkedIn=8/hr 25/day). Actions: `rsvpLumaEvent`, `linkedinConnect`, `runBackstageQueue`. One-time login via `node scripts/browser-agent-setup.mjs`. CLI testing via `pnpm exec tsx scripts/browser-agent-run.ts ...`. Added `playwright` + `tsx` to deps.
+- 14:55 [A] **Project rename: ButterSocial → SocialButter.** Repo renamed on GitHub (jennyruan/buttersocial → jennyruan/socialbutter), git remote updated. Bulk sed across all tracked + untracked files: `ButterSocial`→`SocialButter`, `buttersocial`→`socialbutter`, `bs-`→`sb-` (CSS class prefix). `drafts/bs-tokens.css` → `drafts/sb-tokens.css`. Browser profile dir is now `~/.socialbutter-browser-profile`. Local dir path unchanged (still `~/code/experiments/buttersocial/`) for terminal-coordination safety; rename later.

@@ -45,7 +45,7 @@ this file because the auto-mode classifier protects hook config):
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jennyr/code/experiments/buttersocial/.claude/sync-hook.sh"
+            "command": "/Users/jennyr/code/experiments/socialbutter/.claude/sync-hook.sh"
           }
         ]
       }

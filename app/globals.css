@@ -1,5 +1,5 @@
-/* ButterSocial — design tokens + base components.
- * Mirrors AMGINA's day theme: cream/paper/ink/amber. bs-* class prefix
+/* SocialButter — design tokens + base components.
+ * Mirrors AMGINA's day theme: cream/paper/ink/amber. sb-* class prefix
  * parallel to AMGINA's amg-*. See CLAUDE.md §3.
  */
 
@@ -64,9 +64,9 @@ input, textarea {
 input::placeholder, textarea::placeholder { color: var(--text-muted); }
 input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-offset: -2px; }
 
-.bs-page { min-height: 100vh; background: var(--bg-app); }
+.sb-page { min-height: 100vh; background: var(--bg-app); }
 
-.bs-header {
+.sb-header {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -79,26 +79,26 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   gap: 12px;
   flex-wrap: wrap;
 }
-.bs-header-left {
+.sb-header-left {
   display: flex;
   align-items: baseline;
   gap: 12px;
   min-width: 0;
   flex-wrap: wrap;
 }
-.bs-header-greeting {
+.sb-header-greeting {
   font-size: 22px;
   font-weight: 400;
   line-height: 1.2;
   color: var(--text-primary);
   letter-spacing: 0.01em;
 }
-.bs-header-sub {
+.sb-header-sub {
   font-size: 13px;
   color: var(--text-muted);
 }
 
-.bs-main {
+.sb-main {
   max-width: 960px;
   margin: 0 auto;
   padding: 28px 24px 80px;
@@ -107,7 +107,7 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   gap: 28px;
 }
 
-.bs-card {
+.sb-card {
   background: var(--bg-pane);
   border: 2px solid var(--border-default);
   border-radius: 0;
@@ -117,20 +117,20 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   gap: 12px;
 }
 
-.bs-section-title {
+.sb-section-title {
   font-size: 18px;
   font-weight: 400;
   margin: 0;
   color: var(--text-primary);
   letter-spacing: 0.01em;
 }
-.bs-help-text {
+.sb-help-text {
   margin: 0;
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.55;
 }
-.bs-mono {
+.sb-mono {
   font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -138,22 +138,22 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   color: var(--text-secondary);
 }
 
-.bs-connect-card { gap: 16px; }
+.sb-connect-card { gap: 16px; }
 
-.bs-form {
+.sb-form {
   display: flex;
   gap: 10px;
   align-items: stretch;
   margin-top: 4px;
   flex-wrap: wrap;
 }
-.bs-form-vertical {
+.sb-form-vertical {
   flex-direction: column;
   align-items: stretch;
 }
-.bs-form-vertical .bs-btn-primary { align-self: flex-start; }
+.sb-form-vertical .sb-btn-primary { align-self: flex-start; }
 
-.bs-textarea {
+.sb-textarea {
   width: 100%;
   flex: none;
   padding: 12px 14px;
@@ -164,7 +164,7 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   min-height: 110px;
 }
 
-.bs-input {
+.sb-input {
   flex: 1 1 280px;
   min-width: 0;
   padding: 12px 14px;
@@ -175,7 +175,7 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   color: var(--text-primary);
 }
 
-.bs-btn-primary {
+.sb-btn-primary {
   padding: 12px 20px;
   background: var(--accent-primary);
   color: var(--text-primary);
@@ -187,11 +187,11 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   cursor: pointer;
   transition: background 80ms ease, transform 60ms ease;
 }
-.bs-btn-primary:hover:not(:disabled) { background: var(--accent-primary-hover); }
-.bs-btn-primary:active:not(:disabled) { transform: translateY(1px); }
-.bs-btn-primary:disabled { background: var(--text-disabled); cursor: not-allowed; }
+.sb-btn-primary:hover:not(:disabled) { background: var(--accent-primary-hover); }
+.sb-btn-primary:active:not(:disabled) { transform: translateY(1px); }
+.sb-btn-primary:disabled { background: var(--text-disabled); cursor: not-allowed; }
 
-.bs-error {
+.sb-error {
   margin-top: 8px;
   padding: 12px 14px;
   background: rgba(196, 83, 74, 0.10);
@@ -200,33 +200,33 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   font-size: 14px;
 }
 
-.bs-events-section { display: flex; flex-direction: column; gap: 16px; }
-.bs-events-header {
+.sb-events-section { display: flex; flex-direction: column; gap: 16px; }
+.sb-events-header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
 }
-.bs-events-source { color: var(--text-muted); }
-.bs-event-grid {
+.sb-events-source { color: var(--text-muted); }
+.sb-event-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 14px;
 }
-.bs-event-card { padding: 18px; gap: 8px; }
-.bs-event-when { color: var(--text-secondary); }
-.bs-event-title {
+.sb-event-card { padding: 18px; gap: 8px; }
+.sb-event-when { color: var(--text-secondary); }
+.sb-event-title {
   margin: 0;
   font-size: 17px;
   font-weight: 500;
   line-height: 1.35;
   color: var(--text-primary);
 }
-.bs-event-host { font-size: 13px; color: var(--text-secondary); }
-.bs-event-location { font-size: 13px; color: var(--text-muted); }
+.sb-event-host { font-size: 13px; color: var(--text-secondary); }
+.sb-event-location { font-size: 13px; color: var(--text-muted); }
 
-.bs-link {
+.sb-link {
   margin-top: 4px;
   color: var(--accent-primary);
   text-decoration: none;
@@ -236,9 +236,9 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   border-bottom: 1px dashed transparent;
   align-self: flex-start;
 }
-.bs-link:hover { border-bottom-color: var(--accent-primary); }
+.sb-link:hover { border-bottom-color: var(--accent-primary); }
 
-.bs-empty {
+.sb-empty {
   padding: 32px;
   text-align: center;
   color: var(--text-muted);
@@ -247,8 +247,8 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
 }
 
 @media (max-width: 640px) {
-  .bs-header { padding: 12px 16px; }
-  .bs-main { padding: 18px 16px 80px; }
-  .bs-header-greeting { font-size: 19px; }
-  .bs-event-grid { grid-template-columns: 1fr; }
+  .sb-header { padding: 12px 16px; }
+  .sb-main { padding: 18px 16px 80px; }
+  .sb-header-greeting { font-size: 19px; }
+  .sb-event-grid { grid-template-columns: 1fr; }
 }

@@ -1,4 +1,4 @@
-# ButterSocial — project rules
+# SocialButter — project rules
 
 Hackathon project. Beta Fund × Evermind "One Person Company", SF 2026-05-30.
 Read `README.md` first for the locked one-page design (user / data model /
@@ -56,10 +56,10 @@ Visual language follows `~/code/experiments/amgina/app/globals.css`.
 **Shape:** 2px ink borders, `border-radius: 0` on cards, square 36×36 icon
 buttons, sticky header.
 
-**Class prefix:** use `bs-*` (ButterSocial) mirroring AMGINA's `amg-*`.
-E.g. `bs-card`, `bs-header`, `bs-fab`, `bs-icon-btn`.
+**Class prefix:** use `sb-*` (SocialButter) mirroring AMGINA's `amg-*`.
+E.g. `sb-card`, `sb-header`, `sb-fab`, `sb-icon-btn`.
 
-Draft tokens live at `drafts/bs-tokens.css` — merge into `app/globals.css`
+Draft tokens live at `drafts/sb-tokens.css` — merge into `app/globals.css`
 when scaffold lands.
 
 ---
@@ -84,10 +84,10 @@ when scaffold lands.
 ## 5. File layout (target post-scaffold)
 
 ```
-buttersocial/
+socialbutter/
 ├── app/
 │   ├── layout.tsx              ← Terminal B (scaffold)
-│   ├── globals.css             ← Terminal B (merge drafts/bs-tokens.css in)
+│   ├── globals.css             ← Terminal B (merge drafts/sb-tokens.css in)
 │   ├── page.tsx                ← landing / dashboard
 │   ├── connect/
 │   │   └── page.tsx            ← from drafts/connect-page.tsx
@@ -107,7 +107,7 @@ buttersocial/
 **Post-scaffold migration:**
 1. Move `drafts/connect-page.tsx` → `app/connect/page.tsx`
 2. Move `drafts/luma-import-route.ts` → `app/api/luma/import/route.ts`
-3. Merge `drafts/bs-tokens.css` contents into `app/globals.css`
+3. Merge `drafts/sb-tokens.css` contents into `app/globals.css`
 4. Delete `drafts/`
 5. Add LXGW WenKai font (Google Fonts: `https://fonts.googleapis.com/...`
    or self-host) in `app/layout.tsx`

@@ -2,7 +2,7 @@
 //
 // Single screen: input box + "Import" button. On import, calls the Luma
 // route handler and renders real events as cards in AMGINA design language
-// (cream/paper/ink/amber, square corners, 2px ink borders, bs-* classes).
+// (cream/paper/ink/amber, square corners, 2px ink borders, sb-* classes).
 //
 // NO mock data anywhere — empty state is empty until the user imports.
 
@@ -46,45 +46,45 @@ export default function ConnectPage() {
   }
 
   return (
-    <div className="bs-page">
-      <header className="bs-header">
-        <div className="bs-header-left">
-          <span className="bs-header-greeting">ButterSocial</span>
-          <span className="bs-header-sub">
+    <div className="sb-page">
+      <header className="sb-header">
+        <div className="sb-header-left">
+          <span className="sb-header-greeting">SocialButter</span>
+          <span className="sb-header-sub">
             Pick the events worth your time
           </span>
         </div>
       </header>
 
-      <main className="bs-main">
-        <section className="bs-card bs-connect-card">
-          <h2 className="bs-section-title">Connect your Luma</h2>
-          <p className="bs-help-text">
+      <main className="sb-main">
+        <section className="sb-card sb-connect-card">
+          <h2 className="sb-section-title">Connect your Luma</h2>
+          <p className="sb-help-text">
             Paste your <strong>personal Luma calendar URL</strong> to pull
-            every event you've RSVP'd to or hosted — ButterSocial refreshes
+            every event you've RSVP'd to or hosted — SocialButter refreshes
             on every load. Find it at{" "}
             <a
               href="https://lu.ma/settings/calendar"
               target="_blank"
               rel="noopener noreferrer"
-              className="bs-link"
+              className="sb-link"
             >
               Luma → Settings → Calendar
             </a>{" "}
-            (look for the <code className="bs-mono">api.lu.ma/ics/...</code>
+            (look for the <code className="sb-mono">api.lu.ma/ics/...</code>
             link). Or paste individual{" "}
-            <code className="bs-mono">lu.ma/&lt;event&gt;</code> URLs — one
+            <code className="sb-mono">lu.ma/&lt;event&gt;</code> URLs — one
             per line. All data fetched live, no mocks.
           </p>
 
-          <form onSubmit={handleImport} className="bs-form bs-form-vertical">
+          <form onSubmit={handleImport} className="sb-form sb-form-vertical">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
                 "https://api.lu.ma/ics/get?entity=user&id=…&token=…\n\n— or —\n\nhttps://lu.ma/h7h9r7bw\nhttps://lu.ma/abc123"
               }
-              className="bs-input bs-textarea"
+              className="sb-input sb-textarea"
               disabled={loading}
               autoFocus
               spellCheck={false}
@@ -92,7 +92,7 @@ export default function ConnectPage() {
             />
             <button
               type="submit"
-              className="bs-btn-primary"
+              className="sb-btn-primary"
               disabled={loading || !input.trim()}
             >
               {loading ? "Connecting…" : "Connect Luma"}
@@ -100,25 +100,25 @@ export default function ConnectPage() {
           </form>
 
           {error && (
-            <div className="bs-error" role="alert">
+            <div className="sb-error" role="alert">
               <strong>Couldn't import:</strong> {error}
             </div>
           )}
         </section>
 
         {events.length > 0 && (
-          <section className="bs-events-section">
-            <div className="bs-events-header">
-              <h2 className="bs-section-title">
+          <section className="sb-events-section">
+            <div className="sb-events-header">
+              <h2 className="sb-section-title">
                 {events.length} event{events.length === 1 ? "" : "s"}
               </h2>
               {importedFrom && (
-                <span className="bs-mono bs-events-source">
+                <span className="sb-mono sb-events-source">
                   from {importedFrom}
                 </span>
               )}
             </div>
-            <div className="bs-event-grid">
+            <div className="sb-event-grid">
               {events
                 .slice()
                 .sort((a, b) => (a.datetime < b.datetime ? -1 : 1))
@@ -130,7 +130,7 @@ export default function ConnectPage() {
         )}
 
         {!loading && !error && events.length === 0 && importedFrom && (
-          <div className="bs-empty">
+          <div className="sb-empty">
             No public events found for that input.
           </div>
         )}
@@ -142,18 +142,18 @@ export default function ConnectPage() {
 function EventCard({ event }: { event: LumaEvent }) {
   const when = formatWhen(event.datetime);
   return (
-    <article className="bs-card bs-event-card">
-      <div className="bs-event-when bs-mono">{when}</div>
-      <h3 className="bs-event-title">{event.title}</h3>
-      <div className="bs-event-host">by {event.host}</div>
+    <article className="sb-card sb-event-card">
+      <div className="sb-event-when sb-mono">{when}</div>
+      <h3 className="sb-event-title">{event.title}</h3>
+      <div className="sb-event-host">by {event.host}</div>
       {event.location && (
-        <div className="bs-event-location">{event.location}</div>
+        <div className="sb-event-location">{event.location}</div>
       )}
       <a
         href={event.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="bs-link"
+        className="sb-link"
       >
         Open on Luma →
       </a>

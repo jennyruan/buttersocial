@@ -1,4 +1,4 @@
-// ButterSocial backstage browser agent — drives a real Chromium with a
+// SocialButter backstage browser agent — drives a real Chromium with a
 // persistent profile so cookies, fingerprint, and saved sessions match a
 // real human. Runs headless by default; output is a result log, not pixels.
 //
@@ -9,7 +9,7 @@
 // - Humanized delays, scroll-before-click, char-by-char typing, mouse arcs
 // - Conservative per-action rate limits below platform soft-caps
 //
-// Profile location: ~/.buttersocial-browser-profile (separate from the
+// Profile location: ~/.socialbutter-browser-profile (separate from the
 // user's daily Chrome so we don't fight for the profile lock). First-time
 // setup requires the user to log into Luma + LinkedIn once in that profile.
 //
@@ -20,7 +20,7 @@ import { chromium, type BrowserContext, type Page } from "playwright";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const PROFILE_DIR = join(homedir(), ".buttersocial-browser-profile");
+const PROFILE_DIR = join(homedir(), ".socialbutter-browser-profile");
 
 // Conservative limits — well below platform soft-caps to stay invisible.
 export const RATE_LIMITS = {

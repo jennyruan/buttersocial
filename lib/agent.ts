@@ -1,4 +1,4 @@
-// ButterSocial agent — ranking + host-intro drafting.
+// SocialButter agent — ranking + host-intro drafting.
 //
 // Composes three real systems:
 //   1. Luma events  (lib/luma.ts, already real-fetching)
@@ -87,7 +87,7 @@ export async function rankEvents(
 
   // One LLM call ranks the full batch — keeps reasoning consistent across events
   // and gives the model the ability to compare them.
-  const systemPrompt = `You are ButterSocial, an agent that decides which networking events a busy founder should attend. Be opinionated. Lean on the user's past feedback. For each event, output a JSON object with:
+  const systemPrompt = `You are SocialButter, an agent that decides which networking events a busy founder should attend. Be opinionated. Lean on the user's past feedback. For each event, output a JSON object with:
   - "id": echo of the event id
   - "decision": "go" | "skip" | "maybe"
   - "reason": ONE plain-language sentence, under 30 words, that cites the user's past feedback when applicable
@@ -249,7 +249,7 @@ export async function recordFeedback(
   const content = `${verbal} the event "${event.title}" hosted by ${event.host} on ${event.datetime}.${feedback.note ? ` Note: ${feedback.note}` : ""}`;
 
   await deps.evermind.addMemory(content, {
-    source: "buttersocial.feedback",
+    source: "socialbutter.feedback",
     event_id: event.id,
     event_url: event.url,
     sentiment: feedback.sentiment,

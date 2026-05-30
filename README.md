@@ -1,4 +1,4 @@
-# ButterSocial
+# SocialButter
 
 Agent that helps busy professionals decide which events to attend — based on calendar availability, past event feedback, and a self-evolving memory of what works for them.
 
@@ -115,4 +115,4 @@ Pasting URLs keeps the data 100% real and bypasses the auth wall.
 
 ## What this is NOT
 
-This is **not AMGINA**. AMGINA is the locked local-first + E2EE personal AI shell. ButterSocial is a cloud agent on Evermind for a specific GTM-ops use case. Keep stories separate.
+This is **not AMGINA**. AMGINA is the locked local-first + E2EE personal AI shell. SocialButter is a cloud agent on Evermind for a specific GTM-ops use case. Keep stories separate.

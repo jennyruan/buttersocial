@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// One-time setup: launches the ButterSocial agent profile with a visible
+// One-time setup: launches the SocialButter agent profile with a visible
 // browser so the user can log into Luma + LinkedIn. After they sign in
 // and close the window, the persistent profile keeps the cookies and the
 // headless agent reuses them forever (until tokens expire).
@@ -16,9 +16,9 @@ import { chromium } from "playwright";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const PROFILE_DIR = join(homedir(), ".buttersocial-browser-profile");
+const PROFILE_DIR = join(homedir(), ".socialbutter-browser-profile");
 
-console.log("ButterSocial agent setup");
+console.log("SocialButter agent setup");
 console.log("Profile directory:", PROFILE_DIR);
 console.log("");
 console.log("Steps:");

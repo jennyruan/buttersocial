@@ -10,7 +10,7 @@
 // No fixtures, no mocks (per CLAUDE.md §2).
 
 const LUMA_BASE = "https://lu.ma";
-const UA = "Mozilla/5.0 (compatible; ButterSocial/0.1; +https://github.com/jennyruan/buttersocial)";
+const UA = "Mozilla/5.0 (compatible; SocialButter/0.1; +https://github.com/jennyruan/socialbutter)";
 
 export interface LumaEvent {
   id: string;

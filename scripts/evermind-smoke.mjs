@@ -11,7 +11,7 @@ if (!KEY) {
   process.exit(1);
 }
 
-const userId = "buttersocial_demo_user";
+const userId = "socialbutter_demo_user";
 const sessionId = `smoke_${Date.now()}`;
 
 async function call(path, body) {

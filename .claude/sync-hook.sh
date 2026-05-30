@@ -11,7 +11,7 @@
 
 set +e  # never fail the prompt because of sync issues
 
-REPO="/Users/jennyr/code/experiments/buttersocial"
+REPO="/Users/jennyr/code/experiments/socialbutter"
 
 # Only run if the current shell is anywhere inside the repo.
 case "$PWD" in
