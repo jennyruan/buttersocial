@@ -14,7 +14,10 @@ the only link Jenny pastes into the submission, the deck, or the demo.
 - **Frontend deploys** → Butterbase app `socialbutter` (`app_3moov7i9bzwb`)
   via `mcp__butterbase__create_frontend_deployment` + `start_deployment`.
 - **Backend / API / DB / functions / auth / storage** → same app
-  (`app_3moov7i9bzwb`). API URL: `https://api.butterbase.dev/v1/app_3moov7i9bzwb`.
+  (`app_3moov7i9bzwb`). API base: `https://api.butterbase.ai/v1/app_3moov7i9bzwb`
+  (note the `.ai` host — that's the control + data plane; `.butterbase.dev`
+  is only the frontend hosting subdomain).
+  Function invoke URL pattern: `{api_base}/fn/{function-name}`.
 - **All custom domains, OAuth callbacks, CORS allowed origins** must point
   at `socialbutter.butterbase.dev`, not `jenny-sandbox.butterbase.dev`.
 
