@@ -46,6 +46,7 @@ export default function ConnectPage() {
     <div className="sb-page">
       <header className="sb-header">
         <div className="sb-header-left">
+          <ButterflyLogo />
           <span className="sb-header-greeting">SocialButter</span>
           <span className="sb-header-sub">
             Pick the events worth your time
@@ -220,4 +221,24 @@ function formatWhen(iso: string): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function ButterflyLogo() {
+  return (
+    <svg
+      className="sb-logo"
+      viewBox="0 0 240 180"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="SocialButter logo"
+    >
+      <g fill="#D4A657" stroke="#2B2B2B" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round">
+        <path d="M120 82 C 96 30, 48 12, 24 32 C 4 52, -2 80, 24 92 C 60 102, 100 96, 120 85 Z" />
+        <path d="M120 82 C 144 30, 192 12, 216 32 C 236 52, 242 80, 216 92 C 180 102, 140 96, 120 85 Z" />
+        <path d="M120 92 C 102 112, 70 132, 50 162 C 38 178, 78 178, 102 156 C 116 142, 120 108, 120 92 Z" />
+        <path d="M120 92 C 138 112, 170 132, 190 162 C 202 178, 162 178, 138 156 C 124 142, 120 108, 120 92 Z" />
+      </g>
+      <ellipse cx="120" cy="100" rx="5" ry="34" fill="#2B2B2B" />
+    </svg>
+  );
 }
