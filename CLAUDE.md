@@ -6,6 +6,29 @@ demo script / scope / time-box).
 
 ---
 
+## 0. Canonical deploy: socialbutter.butterbase.dev
+
+**The presenting URL is `https://socialbutter.butterbase.dev/`.** This is
+the only link Jenny pastes into the submission, the deck, or the demo.
+
+- **Frontend deploys** → Butterbase app `socialbutter` (`app_3moov7i9bzwb`)
+  via `mcp__butterbase__create_frontend_deployment` + `start_deployment`.
+- **Backend / API / DB / functions / auth / storage** → same app
+  (`app_3moov7i9bzwb`). API URL: `https://api.butterbase.dev/v1/app_3moov7i9bzwb`.
+- **All custom domains, OAuth callbacks, CORS allowed origins** must point
+  at `socialbutter.butterbase.dev`, not `jenny-sandbox.butterbase.dev`.
+
+`jenny-sandbox.butterbase.dev` (`app_quoz1f3ox8j0`) is a **scratch sandbox
+only** — safe to break, do not link from any pitch artifact, do not point
+production-ish wiring at it. If you deploy something there for testing,
+say so explicitly in `STATUS.md` and don't update README / deck / footer
+links to it.
+
+If you have to redeploy the landing page from `/tmp/sb-deploy/`, deploy to
+BOTH apps so they don't drift, but **socialbutter is the canonical one**.
+
+---
+
 ## 1. Push to main (overrides global Branch Safety)
 
 This is a hackathon repo with multiple Claude terminals + a human all
