@@ -13,7 +13,7 @@ export default function ConnectPage() {
           <ButterflyLogo />
           <span className="sb-header-greeting">SocialButter</span>
           <span className="sb-header-sub">
-            Pick the events worth your time
+            SocialButter for buttery smooth social planning!
           </span>
         </div>
       </header>
