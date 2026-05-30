@@ -23,7 +23,7 @@ Pre-Push Review sections **for this repo only**.
 
 ---
 
-## 2. No mock data
+## 2. No mock data — ESPECIALLY no mock user data
 
 **All data must be real.** No fixtures, no hardcoded sample events, no
 fake users, no dummy Evermind memories, no Lorem Ipsum.
@@ -32,13 +32,58 @@ Why: the demo's wow moment depends on Evermind retrieving Jenny's *actual*
 past event feedback on screen. Mock data breaks the story and is obvious to
 judges who've seen 50 demos that day.
 
-**How to apply:**
+### 2a. User data — zero tolerance, no exceptions
+
+**NEVER hardcode user-shaped data anywhere in the codebase.** This is the
+strictest version of the rule and overrides every other consideration
+(scaffold convenience, demo prep, "just for testing", linter happiness).
+
+Forbidden — do not type any of these into a source file, even temporarily:
+- A name (real OR invented: "Jane Smith", "Alice", "John Doe")
+- An email, phone, X handle, LinkedIn slug, Luma profile URL
+- A bio, headline, "About me" snippet, profile photo URL
+- A past-event feedback string ("loved the AI infra dinner", etc.)
+- A goal sentence ("I want to meet investors")
+- An attendee list, RSVP list, contact list
+- A draft DM body, intro message, follow-up text
+- A persona, avatar, or fictional user record
+- An example `events`/`people`/`memories` array in the UI or tests
+
+If you find yourself wanting to write `const sampleUser = { name: "..." }`,
+**stop**. The right move is one of:
+
+1. **Fail loud.** Throw or return an explicit error with instructions
+   (`"Connect your Luma to see events"`, `"Sign in once via setup script"`).
+2. **Empty state.** Render an empty list with a clear call to action.
+3. **TODO marker.** `// TODO: wire <real source> here — do NOT add mock data`
+4. **Real fetch.** Hit the real API even in dev — that's what env vars are for.
+
+### 2b. Infra smoke tests are the only exception
+
+`scripts/*-smoke.mjs` may write disposable test data IF it uses an
+isolated identifier (e.g., `user_id: "buttersocial_demo_user"`) that is
+NEVER read back into the product. Smoke tests verify wiring; they do
+not seed demo content.
+
+### 2c. Demo dataset
+
+The dataset shown in demo must be Jenny's actual past events / actual
+past feedback / actual social profile. Pre-seed Evermind from her real
+history (one-shot script she runs herself); do not write a `seedDemoData()`
+function in the repo.
+
+**How to apply throughout:**
 - Luma fetcher hits the real `lu.ma` site (HTML scrape / JSON-LD / __NEXT_DATA__).
+- X / LinkedIn search + person lookup go through the live browser-agent profile.
 - Evermind reads/writes go to a real Evermind instance.
 - Butterbase persistence goes to a real Butterbase project.
-- Jenny's actual past events from her Luma profile are the demo dataset.
+- Calendar conflict detection reads real Apple / Google / Luma subscriptions.
 - If a vendor SDK isn't wired up yet, leave the call site as a clearly
-  marked `TODO: wire Evermind here` rather than substituting a fake value.
+  marked `TODO` rather than substituting a fake value.
+
+### 2d. Pre-commit grep self-check
+
+Before committing, ask: would `git grep -E '(@example\.com|Lorem|John Doe|Jane Smith|sampleEvent|mockUser|fakeProfile)'` return anything? If yes, you violated this rule. Remove it before the commit lands.
 
 ---
 
