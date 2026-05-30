@@ -240,6 +240,26 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-of
   margin: 12px 0 18px;
 }
 
+.sb-x-connected {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 2px solid var(--border-default);
+  background: var(--accent-primary-soft);
+  margin-bottom: 14px;
+}
+.sb-x-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid var(--border-default);
+  background: var(--bg-pane);
+}
+.sb-x-meta { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.sb-x-name { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+
 .sb-error {
   margin-top: 8px;
   padding: 12px 14px;

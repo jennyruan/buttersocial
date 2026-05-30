@@ -138,12 +138,42 @@ function LumaEventCard({ event, rankable }: { event: LumaEvent; rankable: Rankab
 // Section 2 — Find events on X / LinkedIn (live browser scrape)
 // =========================================================================
 
+interface OwnXProfileSummary {
+  handle: string;
+  profile: {
+    name: string;
+    bio?: string;
+    avatarUrl?: string;
+    followers?: number;
+  };
+  recentInteractions: Array<{ handle: string }>;
+}
+
 function FindEventsSection() {
   const [source, setSource] = useState<SocialSource>("linkedin");
   const [query, setQuery] = useState("");
   const [events, setEvents] = useState<DiscoveredEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [xProfile, setXProfile] = useState<OwnXProfileSummary | null>(null);
+  const [xConnecting, setXConnecting] = useState(false);
+  const [xError, setXError] = useState<string | null>(null);
+
+  async function handleConnectX() {
+    setXConnecting(true);
+    setXError(null);
+    try {
+      const res = await fetch("/api/x/connect", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `Connect X failed (HTTP ${res.status})`);
+      setXProfile(data);
+      setSource("x");
+    } catch (err) {
+      setXError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setXConnecting(false);
+    }
+  }
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -177,6 +207,44 @@ function FindEventsSection() {
           logged-in profile). For X it scans recent posts for event
           mentions; for LinkedIn it queries LinkedIn Events directly.
         </p>
+
+        <div className="sb-auto-row">
+          <button
+            type="button"
+            className="sb-btn-secondary"
+            onClick={handleConnectX}
+            disabled={xConnecting}
+          >
+            {xConnecting ? "Connecting X…" : xProfile ? `X connected: @${xProfile.handle}` : "Connect X"}
+          </button>
+        </div>
+        {xProfile && (
+          <div className="sb-x-connected">
+            {xProfile.profile.avatarUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={xProfile.profile.avatarUrl} alt="" className="sb-x-avatar" />
+            )}
+            <div className="sb-x-meta">
+              <div className="sb-x-name">{xProfile.profile.name} <span className="sb-mono">@{xProfile.handle}</span></div>
+              {typeof xProfile.profile.followers === "number" && (
+                <div className="sb-help-text">{xProfile.profile.followers.toLocaleString()} followers</div>
+              )}
+              {xProfile.recentInteractions.length > 0 && (
+                <div className="sb-help-text">
+                  Recently engaged with:{" "}
+                  {xProfile.recentInteractions.slice(0, 8).map((p, i) => (
+                    <span key={p.handle}>
+                      {i > 0 && ", "}
+                      <a href={`https://x.com/${p.handle}`} target="_blank" rel="noopener noreferrer" className="sb-link sb-link-inline">@{p.handle}</a>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {xError && <div className="sb-error" role="alert"><strong>Couldn&apos;t connect X:</strong> {xError}</div>}
+
         <form onSubmit={handleSearch} className="sb-form sb-form-vertical">
           <SourceToggle source={source} onChange={setSource} />
           <input

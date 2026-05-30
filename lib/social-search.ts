@@ -522,6 +522,89 @@ function normalizeLinkedInSlug(input: string): string {
   return trimmed.replace(/^\/?(in\/)?/, "").replace(/\/$/, "");
 }
 
+/**
+ * Read the logged-in user's own X handle, then run a full profile scrape.
+ * One-click "Connect X" — gives SocialButter your @handle, bio, follower
+ * count, avatar, and recent posts so the ranker can prime on who you
+ * actually are on X (not guessing from Evermind alone).
+ */
+export interface OwnXProfile {
+  source: "x";
+  handle: string;
+  profile: DiscoveredPerson;
+  recentInteractions: Array<{ handle: string; via: "reply" | "like" | "rt" | "feed"; lastSeenAt?: string }>;
+}
+
+export async function extractOwnXProfile(): Promise<OwnXProfile> {
+  const ctx = await getBrowserContext();
+  const page = await ctx.newPage();
+  try {
+    await page.goto("https://x.com/home", { waitUntil: "domcontentloaded", timeout: 15_000 });
+    if (await isXLoggedOut(page)) {
+      throw new SocialSearchError(
+        "X is not logged in. Run `node scripts/browser-agent-setup.mjs` and sign in.",
+        "x",
+        "not_logged_in",
+      );
+    }
+
+    await page.waitForSelector("[data-testid='primaryColumn']", { timeout: 10_000 });
+    await page.waitForTimeout(800);
+
+    // Find own handle from the profile nav link (href is /<handle>)
+    const handle = await page.evaluate(() => {
+      const link = document.querySelector(
+        "a[data-testid='AppTabBar_Profile_Link']",
+      ) as HTMLAnchorElement | null;
+      if (link?.pathname) return link.pathname.replace(/^\/+/, "").toLowerCase();
+      const acct = document.querySelector("[data-testid='SideNav_AccountSwitcher_Button']");
+      const text = acct?.textContent ?? "";
+      const m = text.match(/@(\w+)/);
+      return m ? m[1].toLowerCase() : "";
+    });
+    if (!handle) {
+      throw new SocialSearchError(
+        "Couldn't read own X handle from sidebar — DOM may have changed.",
+        "x",
+        "selector_broken",
+      );
+    }
+
+    // Scrape the home feed authors as "recent interactions" before navigating away
+    const feedAuthors = await page.evaluate(() => {
+      const tweets = Array.from(document.querySelectorAll("article")).slice(0, 25);
+      const seen = new Map<string, { lastSeenAt?: string }>();
+      for (const t of tweets) {
+        const link = t.querySelector("[data-testid='User-Name'] a[href^='/']") as HTMLAnchorElement | null;
+        const h = link?.pathname?.replace(/^\/+/, "")?.toLowerCase();
+        if (!h || h.includes("/")) continue;
+        const time = t.querySelector("time")?.getAttribute("datetime") ?? undefined;
+        if (!seen.has(h)) seen.set(h, { lastSeenAt: time });
+      }
+      return Array.from(seen.entries()).map(([handle, { lastSeenAt }]) => ({ handle, lastSeenAt }));
+    });
+
+    await page.close();
+
+    const profile = await findPersonOnX(handle);
+
+    const recentInteractions = feedAuthors
+      .filter((a) => a.handle !== handle)
+      .slice(0, 15)
+      .map((a) => ({ handle: a.handle, via: "feed" as const, lastSeenAt: a.lastSeenAt }));
+
+    return { source: "x", handle, profile, recentInteractions };
+  } catch (err) {
+    await page.close().catch(() => {});
+    if (err instanceof SocialSearchError) throw err;
+    throw new SocialSearchError(
+      `Own X profile extract failed: ${(err as Error).message}`,
+      "x",
+      "selector_broken",
+    );
+  }
+}
+
 async function isXLoggedOut(page: Page): Promise<boolean> {
   // X redirects logged-out users to a login splash or shows a sign-in modal.
   const loginCta = page.locator("a[href='/login'], [data-testid='loginButton']").first();
